@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_edit">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.twittertest.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.example.twittertest.ui.dashboard.DashboardFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.twittertest.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications"
+        tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_edit"
+        android:name="com.example.twittertest.ui.edit.EditFragment"
+        android:label="edit"
+        tools:layout="@layout/fragment_edit" />
+    <fragment
+        android:id="@+id/navigation_draft"
+        android:name="com.example.twittertest.ui.draft.DraftFragment"
+        android:label="fragment_draft"
+        tools:layout="@layout/fragment_draft" />
+    <fragment
+        android:id="@+id/navigation_history"
+        android:name="com.example.twittertest.ui.history.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+</navigation>
