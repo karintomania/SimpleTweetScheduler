@@ -3,6 +3,7 @@ package com.example.twittertest.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -19,7 +20,7 @@ class TweetSchedule (
     @ColumnInfo(name = "tweet_content")
     val tweetContent: String?,
     @ColumnInfo(name = "schedule")
-    val schedule: Date?,
+    val schedule: LocalDateTime?,
     @ColumnInfo(name = "last_update")
-    val lastUpdate: Date?
+    val lastUpdate: LocalDateTime?
 )

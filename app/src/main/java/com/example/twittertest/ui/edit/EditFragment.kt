@@ -20,6 +20,7 @@ import com.example.twittertest.R
 import com.example.twittertest.database.AppDatabase
 import com.example.twittertest.database.TweetScheduleDao
 import com.example.twittertest.databinding.FragmentEditBinding
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -46,6 +47,8 @@ class EditFragment : Fragment() {
         val viewModelFactory = EditViewModelFactory(datasource, application)
         binding.editViewModel = ViewModelProvider(this, viewModelFactory).get(EditViewModel::class.java)
 
+        setCurrentDate()
+
         binding.textDate.setOnClickListener{
             editTextDateOnClick()
         }
@@ -56,6 +59,10 @@ class EditFragment : Fragment() {
 
         binding.buttonSave.setOnClickListener{
             btnSaveOnClick(application)
+        }
+
+        binding.buttonSchedule.setOnClickListener{
+            btnScheduleOnClick(application)
         }
 
         return binding.root
@@ -73,20 +80,30 @@ class EditFragment : Fragment() {
         val tweetContent = binding.editTextTweet.text.toString()
         Log.i(this.tag, "btnOnClick: content = ${tweetContent}")
 
-        val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
-        val dateTimeString = "${binding.textDate.text} ${binding.textTime.text}"
-        Log.i(tag, "dateTImeString = ${dateTimeString}")
-        val dateTime = LocalDateTime.parse(dateTimeString, dateTimeFormat)
-
-        Log.i(tag, "dateTIme = ${dateTime}")
-
-        binding.editViewModel?.onSend(tweetContent)
+        binding.editViewModel?.onSave(tweetContent)
 
         binding.editTextTweet.setText("")
-        Toast.makeText(application,"Tweet was saved.",Toast.LENGTH_SHORT).show()
+        Toast.makeText(application,"Saved as a draft.",Toast.LENGTH_SHORT).show()
 
     }
 
+    private fun btnScheduleOnClick(application: Application){
+        val tweetContent = binding.editTextTweet.text.toString()
+        Log.i(this.tag, "btnOnClick: content = ${tweetContent}")
+
+        val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
+        val dateTimeString = "${binding.textDate.text} ${binding.textTime.text}"
+        Log.i(tag, "dateTImeString = ${dateTimeString}")
+        val scheduleDateTime = LocalDateTime.parse(dateTimeString, dateTimeFormat)
+
+        Log.i(tag, "dateTIme = ${scheduleDateTime}")
+
+        binding.editViewModel?.onSchedule(tweetContent, scheduleDateTime)
+
+        binding.editTextTweet.setText("")
+        Toast.makeText(application,"Scheduled Tweet: ${dateTimeString}.",Toast.LENGTH_SHORT).show()
+
+    }
     private fun editTextDateOnClick(){
 
         Log.i(tag, "editTextDateOnClick")
@@ -115,4 +132,17 @@ class EditFragment : Fragment() {
         TimePickerDialog(requireContext(), timeSetListener, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true).show()
     }
 
+    private fun setCurrentDate(){
+       val dateFormat = SimpleDateFormat("yyyy/MM/dd")
+
+        val calendar = Calendar.getInstance()
+        calendar.time = Date()
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+
+        val dateString = dateFormat.format(calendar.time)
+        Log.i(tag, "dateString = ${dateString}")
+
+        binding.textDate.text = dateString
+
+    }
 }
