@@ -12,7 +12,7 @@ import java.util.*
 @Entity(tableName = "tweet_schedule")
 class TweetSchedule (
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0L,
     @ColumnInfo(name = "user_id")
     val userId: String? = "test",
     @ColumnInfo(name = "status")

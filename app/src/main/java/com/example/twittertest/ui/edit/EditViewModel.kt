@@ -6,9 +6,14 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.twittertest.database.TweetSchedule
 import com.example.twittertest.database.TweetScheduleDao
 import com.example.twittertest.database.TweetScheduleStatus
+import com.example.twittertest.work.TweetWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.*
@@ -20,7 +25,7 @@ class EditViewModel(
 
     private val tag ="EditViewModel"
     private var tweetScheduleId: String
-
+    private val workManager = WorkManager.getInstance()
     init{
        tweetScheduleId = ""
     }
@@ -30,21 +35,36 @@ class EditViewModel(
         val tweetSchedule = TweetSchedule(status = TweetScheduleStatus.draft,tweetContent =  tweetContent, schedule = null, lastUpdate = LocalDateTime.now())
 
         viewModelScope.launch {
-            insertAll(tweetSchedule)
+            insert(tweetSchedule)
             Log.i(tag, tweetContent)
+
         }
     }
 
     fun onSchedule(tweetContent:String, scheduleDateTime:LocalDateTime){
-        val tweetSchedule = TweetSchedule(status = TweetScheduleStatus.draft,tweetContent =  tweetContent, schedule = scheduleDateTime, lastUpdate = LocalDateTime.now())
+        val tweetSchedule = TweetSchedule(status = TweetScheduleStatus.scheduled,tweetContent =  tweetContent, schedule = scheduleDateTime, lastUpdate = LocalDateTime.now())
 
         viewModelScope.launch {
-            insertAll(tweetSchedule)
+            val insertedId = insert(tweetSchedule)
             Log.i(tag, tweetContent)
+            setTweetWork(insertedId)
         }
+
+
     }
-    private suspend fun insertAll(tweetSchedule: TweetSchedule){
-        database.insertAll(tweetSchedule)
+    private suspend fun insert(tweetSchedule: TweetSchedule): Long {
+        return database.insert(tweetSchedule)
+    }
+
+    private fun setTweetWork(tweetId:Long) {
+        val builder = Data.Builder()
+        builder.putLong("id", tweetId)
+
+        val tweetRequest = OneTimeWorkRequestBuilder<TweetWorker>()
+            .setInputData(builder.build())
+            .build()
+
+        workManager.enqueue(tweetRequest)
     }
 
 }
