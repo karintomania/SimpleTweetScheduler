@@ -66,4 +66,9 @@ dependencies {
 
     // recyclerview
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+    implementation "android.arch.work:work-runtime-ktx:2.4.0"
+
+    // twitter4j
+    implementation 'org.twitter4j:twitter4j-core:4.0.7'
 }

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.twittertest.database.AppDatabase
+import twitter4j.TwitterFactory
 
 class TweetWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
     val tag = "TweetWorker"
@@ -15,7 +16,11 @@ class TweetWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) 
         val id = inputData.getLong("id",0L)
         val tweetSchedule = datasource.selectTweetScheduleById(id)
 
+        val twitter = TwitterFactory().getInstance()
+        twitter.updateStatus(tweetSchedule.tweetContent)
+
         Log.i(tag,tweetSchedule.tweetContent)
+
 
         datasource.delete(tweetSchedule)
 

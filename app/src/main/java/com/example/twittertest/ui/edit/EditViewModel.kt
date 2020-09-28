@@ -1,13 +1,10 @@
 package com.example.twittertest.ui.edit
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.twittertest.database.TweetSchedule
@@ -16,7 +13,8 @@ import com.example.twittertest.database.TweetScheduleStatus
 import com.example.twittertest.work.TweetWorker
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.util.*
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 class EditViewModel(
     private val database: TweetScheduleDao,
@@ -43,11 +41,12 @@ class EditViewModel(
 
     fun onSchedule(tweetContent:String, scheduleDateTime:LocalDateTime){
         val tweetSchedule = TweetSchedule(status = TweetScheduleStatus.scheduled,tweetContent =  tweetContent, schedule = scheduleDateTime, lastUpdate = LocalDateTime.now())
+        val initialDelayMinute = calculateInitialDelayMinute(scheduleDateTime)
 
         viewModelScope.launch {
             val insertedId = insert(tweetSchedule)
             Log.i(tag, tweetContent)
-            setTweetWork(insertedId)
+            setTweetWork(insertedId, initialDelayMinute)
         }
 
 
@@ -56,15 +55,21 @@ class EditViewModel(
         return database.insert(tweetSchedule)
     }
 
-    private fun setTweetWork(tweetId:Long) {
+    private fun setTweetWork(tweetId:Long, initialDelayMinute:Long) {
         val builder = Data.Builder()
         builder.putLong("id", tweetId)
 
         val tweetRequest = OneTimeWorkRequestBuilder<TweetWorker>()
+            .setInitialDelay(initialDelayMinute, TimeUnit.MINUTES)
             .setInputData(builder.build())
             .build()
 
         workManager.enqueue(tweetRequest)
     }
 
+    private fun calculateInitialDelayMinute(scheduleDateTime: LocalDateTime) : Long{
+        val minutes: Long = ChronoUnit.MINUTES.between(LocalDateTime.now(), scheduleDateTime)
+        Log.i(tag, "diff minutes = ${minutes}")
+        return minutes
+    }
 }
