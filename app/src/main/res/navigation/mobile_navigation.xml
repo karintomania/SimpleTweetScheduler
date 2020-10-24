@@ -6,36 +6,31 @@
     app:startDestination="@id/navigation_edit">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.twittertest.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
-
-    <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.twittertest.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
-
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.twittertest.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
-
-    <fragment
         android:id="@+id/navigation_edit"
         android:name="com.example.twittertest.ui.edit.EditFragment"
         android:label="edit"
-        tools:layout="@layout/fragment_edit" />
+        tools:layout="@layout/fragment_edit" >
+        <argument
+            android:name="tweetScheduleId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_draft"
         android:name="com.example.twittertest.ui.draft.DraftFragment"
         android:label="fragment_draft"
-        tools:layout="@layout/fragment_draft" />
+        tools:layout="@layout/fragment_draft" >
+        <action
+            android:id="@+id/action_navigation_draft_to_navigation_edit"
+            app:destination="@id/navigation_edit" />
+    </fragment>
     <fragment
         android:id="@+id/navigation_history"
         android:name="com.example.twittertest.ui.history.HistoryFragment"
         android:label="fragment_history"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_navigation_history_to_navigation_edit"
+            app:destination="@id/navigation_edit" />
+    </fragment>
 </navigation>

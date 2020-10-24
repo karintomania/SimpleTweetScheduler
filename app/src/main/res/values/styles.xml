@@ -10,7 +10,7 @@
     <style name="btn_edit">
         <item name="android:background">@color/colorButton</item>
         <item name="android:textColor">@color/colorButtonText</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
 

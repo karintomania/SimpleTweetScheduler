@@ -1,10 +1,7 @@
 package com.example.twittertest.database
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface TweetScheduleDao {
@@ -20,13 +17,20 @@ interface TweetScheduleDao {
     @Query("SELECT * FROM tweet_schedule WHERE id = :id")
     fun selectTweetScheduleById(id:Long): TweetSchedule
 
+    @Query("SELECT * FROM tweet_schedule WHERE id = :id")
+    suspend fun selectTweetScheduleByIdSuspended(id:Long): TweetSchedule
+
     @Insert
     suspend fun insertAll(vararg ts: TweetSchedule)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(tweetSchedule: TweetSchedule): Long
 
     @Delete
     fun delete(ts: TweetSchedule)
+
+    @Query("DELETE FROM tweet_schedule WHERE id = :id")
+    suspend fun deleteTweetScheduleById(id:Long)
+
 
 }

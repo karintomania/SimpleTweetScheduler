@@ -15,7 +15,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
 import com.example.twittertest.R
 import com.example.twittertest.database.AppDatabase
 import com.example.twittertest.database.TweetScheduleDao
@@ -25,6 +28,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import androidx.lifecycle.Observer
 
 class EditFragment : Fragment() {
 
@@ -34,6 +38,8 @@ class EditFragment : Fragment() {
 
     private lateinit var viewModel: EditViewModel
     lateinit var binding: FragmentEditBinding
+    val args:EditFragmentArgs by navArgs()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,14 +47,27 @@ class EditFragment : Fragment() {
     ): View? {
 
         binding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_edit, container, false)
+        binding.lifecycleOwner = viewLifecycleOwner
+
         val application = requireNotNull(this.activity).application
         val datasource = AppDatabase.getInstance(application).tweetScheduleDao
+        val tweetId = args.tweetScheduleId
 
-        val viewModelFactory = EditViewModelFactory(datasource, application)
-        binding.editViewModel = ViewModelProvider(this, viewModelFactory).get(EditViewModel::class.java)
+        Log.i("EditFragment", "${args.tweetScheduleId}")
 
-        setCurrentDate()
+        val viewModelFactory = EditViewModelFactory(datasource, tweetId, application)
+        val viewModel = ViewModelProvider(this, viewModelFactory).get(EditViewModel::class.java)
+        binding.editViewModel = viewModel
 
+//        viewModel.tweetContent.observe(viewLifecycleOwner, Observer{
+//            binding.editTextTweet.setText(it)
+//        })
+
+
+
+//        setCurrentDate()
+
+        // clickklistener
         binding.textDate.setOnClickListener{
             editTextDateOnClick()
         }

@@ -1,8 +1,11 @@
 package com.example.twittertest.ui.edit
 
 import android.app.Application
+import android.text.format.DateUtils
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
@@ -11,26 +14,55 @@ import com.example.twittertest.database.TweetSchedule
 import com.example.twittertest.database.TweetScheduleDao
 import com.example.twittertest.database.TweetScheduleStatus
 import com.example.twittertest.work.TweetWorker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 class EditViewModel(
     private val database: TweetScheduleDao,
+    private val tweetId: Long,
     application: Application
 ) : AndroidViewModel(application) {
 
     private val tag ="EditViewModel"
-    private var tweetScheduleId: String
     private val workManager = WorkManager.getInstance()
+    // LiveData
+    val tweetContent = MutableLiveData<String>()
+    val scheduleDateTime = MutableLiveData<LocalDateTime>()
+    val scheduleDateString = Transformations.map(scheduleDateTime){
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        it.format(formatter)
+    }
+
+    val scheduleTimeString = Transformations.map(scheduleDateTime){
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        it.format(formatter)
+    }
+
     init{
-       tweetScheduleId = ""
+        val tweetSchedule = getTweetSchedule(tweetId)
+        scheduleDateTime.value = LocalDateTime.now()
+        tweetSchedule?.let{
+         scheduleDateTime.value = tweetSchedule.schedule
+        }
+        Log.i(tag, "Init!!!!!")
+        Log.i(tag, "${tweetId}")
+        Log.i(tag, "scheduleDateString=${scheduleDateString}")
+
     }
 
 
     fun onSave(tweetContent:String){
-        val tweetSchedule = TweetSchedule(status = TweetScheduleStatus.draft,tweetContent =  tweetContent, schedule = null, lastUpdate = LocalDateTime.now())
+        val tweetSchedule:TweetSchedule;
+        if(tweetId == -1L){
+            tweetSchedule = TweetSchedule(status = TweetScheduleStatus.draft,tweetContent =  tweetContent, schedule = null, lastUpdate = LocalDateTime.now())
+        }else{
+            tweetSchedule = TweetSchedule(id = tweetId, status = TweetScheduleStatus.draft,tweetContent =  tweetContent, schedule = null, lastUpdate = LocalDateTime.now())
+        }
 
         viewModelScope.launch {
             insert(tweetSchedule)
@@ -71,5 +103,22 @@ class EditViewModel(
         val minutes: Long = ChronoUnit.MINUTES.between(LocalDateTime.now(), scheduleDateTime)
         Log.i(tag, "diff minutes = ${minutes}")
         return minutes
+    }
+
+    private fun getTweetSchedule(tweetId:Long): TweetSchedule?{
+        var tweetSchedule: TweetSchedule? = null
+        viewModelScope.launch {
+            tweetSchedule = selectTweetScheduleById(tweetId)
+            tweetSchedule?.let{
+                tweetContent.value = it.tweetContent
+//                scheduleDateTime.value = it.schedule
+            }
+        }
+
+        return tweetSchedule
+    }
+
+    private suspend fun selectTweetScheduleById(tweetId: Long): TweetSchedule{
+           return database.selectTweetScheduleByIdSuspended(tweetId)
     }
 }

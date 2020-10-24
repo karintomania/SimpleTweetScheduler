@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="tweetSchedule"
+            type="com.example.twittertest.database.TweetSchedule"/>
+        <variable
+            name="deleteClickListener"
+            type="com.example.twittertest.ui.history.DeleteHistoryListener" />
+        <variable
+            name="editClickListener"
+            type="com.example.twittertest.ui.history.EditHistoryListener" />
+
+    </data>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -30,11 +43,14 @@
                 style="@style/btn_edit"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="4dp"
                 android:text="Edit"
                 android:textSize="12sp"
+                android:onClick="@{()->editClickListener.onClick(tweetSchedule)}"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_historyStatus" />
 
             <TextView
                 android:id="@+id/text_historyContent"
@@ -43,7 +59,7 @@
                 android:layout_marginEnd="8dp"
                 android:padding="16dp"
                 android:text="呟いた内容が入ります"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_historyEdit"
                 app:layout_constraintStart_toStartOf="parent"
@@ -53,13 +69,24 @@
                 android:id="@+id/text_historyStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/badge"
                 android:text="Scheduled"
                 android:textColor="@color/colorButtonText"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/imageButton" />
 
+            <ImageButton
+                android:id="@+id/imageButton"
+                android:layout_width="19dp"
+                android:layout_height="17dp"
+                android:backgroundTint="#00000000"
+                android:onClick="@{()->deleteClickListener.onClick(tweetSchedule)}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_delete" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>
