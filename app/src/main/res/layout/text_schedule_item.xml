@@ -6,10 +6,10 @@
             type="com.example.twittertest.database.TweetSchedule"/>
         <variable
             name="deleteClickListener"
-            type="com.example.twittertest.ui.history.DeleteHistoryListener" />
+            type="com.example.twittertest.ui.schedule.DeleteScheduleListener" />
         <variable
             name="editClickListener"
-            type="com.example.twittertest.ui.history.EditHistoryListener" />
+            type="com.example.twittertest.ui.schedule.EditScheduleListener" />
 
     </data>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
@@ -29,7 +29,7 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/text_historyScheduledDateTime"
+                android:id="@+id/text_scheduleScheduledDateTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:foregroundGravity="center"
@@ -39,7 +39,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/button_historyEdit"
+                android:id="@+id/button_scheduleEdit"
                 style="@style/btn_edit"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
@@ -50,10 +50,10 @@
                 android:onClick="@{()->editClickListener.onClick(tweetSchedule)}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_historyStatus" />
+                app:layout_constraintTop_toBottomOf="@+id/text_scheduleStatus" />
 
             <TextView
-                android:id="@+id/text_historyContent"
+                android:id="@+id/text_scheduleContent"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -61,12 +61,12 @@
                 android:text="呟いた内容が入ります"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/button_historyEdit"
+                app:layout_constraintEnd_toStartOf="@+id/button_scheduleEdit"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_historyScheduledDateTime" />
+                app:layout_constraintTop_toBottomOf="@+id/text_scheduleScheduledDateTime" />
 
             <TextView
-                android:id="@+id/text_historyStatus"
+                android:id="@+id/text_scheduleStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

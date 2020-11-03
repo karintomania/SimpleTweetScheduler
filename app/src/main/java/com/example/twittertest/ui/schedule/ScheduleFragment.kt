@@ -1,4 +1,4 @@
-package com.example.twittertest.ui.history
+package com.example.twittertest.ui.schedule
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -13,58 +13,56 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.example.twittertest.R
 import com.example.twittertest.database.AppDatabase
-import com.example.twittertest.databinding.FragmentHistoryBinding
-import com.example.twittertest.ui.draft.DraftFragmentDirections
-import com.example.twittertest.ui.draft.DraftViewModelFactory
+import com.example.twittertest.databinding.FragmentScheduleBinding
 
-class HistoryFragment : Fragment() {
+class ScheduleFragment : Fragment() {
 
     companion object {
-        fun newInstance() = HistoryFragment()
+        fun newInstance() = ScheduleFragment()
     }
 
-    private lateinit var viewModel: HistoryViewModel
-    private lateinit var binding: FragmentHistoryBinding
+    private lateinit var viewModel: ScheduleViewModel
+    private lateinit var binding: FragmentScheduleBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_history, container, false)
+        binding = DataBindingUtil.inflate(layoutInflater, R.layout.fragment_schedule, container, false)
 
         val application = requireNotNull(this.activity).application
         val datasource = AppDatabase.getInstance(application).tweetScheduleDao
-        val viewModelFactory = HistoryViewModelFactory(datasource, application)
+        val viewModelFactory = ScheduleViewModelFactory(datasource, application)
 
-        viewModel = ViewModelProvider(this, viewModelFactory).get(HistoryViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(ScheduleViewModel::class.java)
 
-        val adapter = HistoryAdapter(
-                DeleteHistoryListener {
+        val adapter = ScheduleAdapter(
+                DeleteScheduleListener {
                     Toast.makeText(application, "Delete ${it}", Toast.LENGTH_LONG).show()
-                    viewModel.onHistoryDeleteClicked(it)
+                    viewModel.onScheduleDeleteClicked(it)
                 },
-                EditHistoryListener {
+                EditScheduleListener {
                     Toast.makeText(application, "Edit ${it}", Toast.LENGTH_LONG).show()
-                    val action = HistoryFragmentDirections.actionNavigationHistoryToNavigationEdit(it)
+                    val action = ScheduleFragmentDirections.actionNavigationScheduleToNavigationEdit(it)
                     requireView().findNavController().navigate(action)
 
                 }
             )
-        binding.listHistory.adapter = adapter
-        viewModel.histories.observe(viewLifecycleOwner, Observer {
+        binding.listSchedule.adapter = adapter
+        viewModel.scheduledTweets.observe(viewLifecycleOwner, Observer {
             it?.let {
                 adapter.data = it
             }
         })
 
-        binding.historyViewModel = viewModel
+        binding.scheduleViewModel = viewModel
 
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(HistoryViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(ScheduleViewModel::class.java)
         // TODO: Use the ViewModel
     }
 

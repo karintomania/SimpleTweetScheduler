@@ -25,12 +25,12 @@
             app:destination="@id/navigation_edit" />
     </fragment>
     <fragment
-        android:id="@+id/navigation_history"
-        android:name="com.example.twittertest.ui.history.HistoryFragment"
-        android:label="fragment_history"
-        tools:layout="@layout/fragment_history" >
+        android:id="@+id/navigation_schedule"
+        android:name="com.example.twittertest.ui.schedule.ScheduleFragment"
+        android:label="fragment_schedule"
+        tools:layout="@layout/fragment_schedule" >
         <action
-            android:id="@+id/action_navigation_history_to_navigation_edit"
+            android:id="@+id/action_navigation_schedule_to_navigation_edit"
             app:destination="@id/navigation_edit" />
     </fragment>
 </navigation>

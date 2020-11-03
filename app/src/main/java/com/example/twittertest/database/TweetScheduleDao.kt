@@ -12,7 +12,7 @@ interface TweetScheduleDao {
     fun selectTweetScheduleByStatus(status:String): LiveData<List<TweetSchedule>>
 
     @Query("SELECT * FROM tweet_schedule WHERE status IN ('scheduled', 'fail', 'sent')")
-    fun selectTweetScheduleInHistory(): LiveData<List<TweetSchedule>>
+    fun selectTweetScheduleInSchedule(): LiveData<List<TweetSchedule>>
 
     @Query("SELECT * FROM tweet_schedule WHERE id = :id")
     fun selectTweetScheduleById(id:Long): TweetSchedule

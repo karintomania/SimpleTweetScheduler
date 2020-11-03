@@ -1,19 +1,16 @@
-package com.example.twittertest.ui.history
+package com.example.twittertest.ui.schedule
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.twittertest.R
 import com.example.twittertest.database.TweetSchedule
-import com.example.twittertest.databinding.TextHistoryItemBinding
-import org.jetbrains.annotations.NotNull
-import java.text.SimpleDateFormat
+import com.example.twittertest.databinding.TextScheduleItemBinding
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class HistoryAdapter(val deleteClickListener: DeleteHistoryListener,
-    val editClickListener: EditHistoryListener): RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
+class ScheduleAdapter(val deleteClickListener: DeleteScheduleListener,
+    val editClickListener: EditScheduleListener): RecyclerView.Adapter<ScheduleAdapter.ViewHolder>() {
 
     var data =  listOf<TweetSchedule>()
         set(value) {
@@ -32,17 +29,17 @@ class HistoryAdapter(val deleteClickListener: DeleteHistoryListener,
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
 
-        val binding = TextHistoryItemBinding.inflate(layoutInflater, parent, false)
+        val binding = TextScheduleItemBinding.inflate(layoutInflater, parent, false)
         return ViewHolder(binding)
     }
 
-    class ViewHolder(val binding: TextHistoryItemBinding) : RecyclerView.ViewHolder(binding.root){
-        val content: TextView = binding.textHistoryContent
+    class ViewHolder(val binding: TextScheduleItemBinding) : RecyclerView.ViewHolder(binding.root){
+        val content: TextView = binding.textScheduleContent
         val dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
         fun bind(item: TweetSchedule){
             binding.tweetSchedule = item
-            binding.textHistoryScheduledDateTime.text = formatScheduleDateTime(item.schedule)
-            binding.textHistoryContent.text = item.tweetContent
+            binding.textScheduleScheduledDateTime.text = formatScheduleDateTime(item.schedule)
+            binding.textScheduleContent.text = item.tweetContent
         }
 
         fun formatScheduleDateTime(schedule: LocalDateTime?): String{
@@ -52,10 +49,10 @@ class HistoryAdapter(val deleteClickListener: DeleteHistoryListener,
     }
 }
 
-class DeleteHistoryListener(val clickListener: (tweetId: Long) -> Unit) {
+class DeleteScheduleListener(val clickListener: (tweetId: Long) -> Unit) {
     fun onClick(tweetSchedule: TweetSchedule) = clickListener(tweetSchedule.id)
 }
 
-class EditHistoryListener(val clickListener: (tweetId: Long) -> Unit) {
+class EditScheduleListener(val clickListener: (tweetId: Long) -> Unit) {
     fun onClick(tweetSchedule: TweetSchedule) = clickListener(tweetSchedule.id)
 }

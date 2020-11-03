@@ -1,21 +1,18 @@
-package com.example.twittertest.ui.history
+package com.example.twittertest.ui.schedule
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.twittertest.database.TweetScheduleDao
-import com.example.twittertest.database.TweetScheduleStatus
 import kotlinx.coroutines.launch
 
-class HistoryViewModel(
+class ScheduleViewModel(
     private val database: TweetScheduleDao,
     application: Application
 ) : AndroidViewModel(application) {
-    val histories = database.selectTweetScheduleInHistory()
+    val scheduledTweets = database.selectTweetScheduleInSchedule()
 
-    fun onHistoryDeleteClicked(id: Long) {
+    fun onScheduleDeleteClicked(id: Long) {
 
         viewModelScope.launch {
             deleteTweet(id)
