@@ -66,6 +66,9 @@ class EditFragment : Fragment() {
 
 
 //        setCurrentDate()
+//        viewModel.tweetContent.observe(viewLifecycleOwner, Observer<String>{tweetContent ->
+//            Log.i(tag, tweetContent)
+//        })
 
         // clickklistener
         binding.textDate.setOnClickListener{
