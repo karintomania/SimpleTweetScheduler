@@ -8,10 +8,10 @@ interface TweetScheduleDao {
     @Query("SELECT * FROM tweet_schedule")
     fun getAll(): LiveData<List<TweetSchedule>>
 
-    @Query("SELECT * FROM tweet_schedule WHERE status = :status")
+    @Query("SELECT * FROM tweet_schedule WHERE status = :status ORDER BY last_update DESC")
     fun selectTweetScheduleByStatus(status:String): LiveData<List<TweetSchedule>>
 
-    @Query("SELECT * FROM tweet_schedule WHERE status IN ('scheduled', 'fail', 'sent')")
+    @Query("SELECT * FROM tweet_schedule WHERE status IN ('scheduled', 'fail', 'sent') ORDER BY schedule ASC")
     fun selectTweetScheduleInSchedule(): LiveData<List<TweetSchedule>>
 
     @Query("SELECT * FROM tweet_schedule WHERE id = :id")
