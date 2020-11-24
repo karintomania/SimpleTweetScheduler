@@ -10,9 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.twittertest.database.TweetSchedule
-import com.example.twittertest.database.TweetScheduleDao
-import com.example.twittertest.database.TweetScheduleStatus
+import com.example.twittertest.database.*
 import com.example.twittertest.ui.TweetContentCounter
 import com.example.twittertest.work.TweetWorker
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +23,7 @@ import java.util.concurrent.TimeUnit
 
 class EditViewModel(
     private val database: TweetScheduleDao,
+    private val userTokenDao: UserTokenDao,
     private val tweetId: Long,
     application: Application
 ) : AndroidViewModel(application) {
@@ -128,5 +127,9 @@ class EditViewModel(
 
     private suspend fun selectTweetScheduleById(tweetId: Long): TweetSchedule{
            return database.selectTweetScheduleByIdSuspended(tweetId)
+    }
+
+    suspend fun storeUserToken(userToken: UserToken){
+        userTokenDao.insert(userToken)
     }
 }

@@ -1,34 +1,46 @@
 package com.example.twittertest.ui.edit
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.Application
 import android.app.DatePickerDialog
+import android.app.Dialog
 import android.app.TimePickerDialog
+import android.net.Uri
 import android.os.Build
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import com.example.twittertest.R
+import com.example.twittertest.TwitterConst
 import com.example.twittertest.database.AppDatabase
 import com.example.twittertest.database.TweetScheduleDao
+import com.example.twittertest.database.UserToken
 import com.example.twittertest.databinding.FragmentEditBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import twitter4j.Twitter
+import twitter4j.TwitterFactory
+import twitter4j.auth.AccessToken
+import twitter4j.conf.ConfigurationBuilder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import androidx.lifecycle.Observer
 
 class EditFragment : Fragment() {
 
@@ -38,6 +50,7 @@ class EditFragment : Fragment() {
 
     private lateinit var viewModel: EditViewModel
     lateinit var binding: FragmentEditBinding
+    val isLoggedIn = false
     val args:EditFragmentArgs by navArgs()
 
 
@@ -51,11 +64,12 @@ class EditFragment : Fragment() {
 
         val application = requireNotNull(this.activity).application
         val datasource = AppDatabase.getInstance(application).tweetScheduleDao
+        val userTokenDao = AppDatabase.getInstance(application).userTokenDao
         val tweetId = args.tweetScheduleId
 
         Log.i("EditFragment", "${args.tweetScheduleId}")
 
-        val viewModelFactory = EditViewModelFactory(datasource, tweetId, application)
+        val viewModelFactory = EditViewModelFactory(datasource, userTokenDao, tweetId, application)
         val viewModel = ViewModelProvider(this, viewModelFactory).get(EditViewModel::class.java)
         binding.editViewModel = viewModel
 
@@ -110,15 +124,17 @@ class EditFragment : Fragment() {
     }
 
     private fun btnScheduleOnClick(application: Application){
+
+        if(!isLoggedIn){
+           Log.i(tag, "you are not logged in.")
+            getRequestToken()
+        }
+
         val tweetContent = binding.editTextTweet.text.toString()
-        Log.i(this.tag, "btnOnClick: content = ${tweetContent}")
 
         val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
         val dateTimeString = "${binding.textDate.text} ${binding.textTime.text}"
-        Log.i(tag, "dateTImeString = ${dateTimeString}")
         val scheduleDateTime = LocalDateTime.parse(dateTimeString, dateTimeFormat)
-
-        Log.i(tag, "dateTIme = ${scheduleDateTime}")
 
         binding.editViewModel?.onSchedule(tweetContent, scheduleDateTime)
 
@@ -165,6 +181,101 @@ class EditFragment : Fragment() {
         Log.i(tag, "dateString = ${dateString}")
 
         binding.textDate.text = dateString
+
+    }
+
+
+    // Twitter Log in.
+    lateinit var twitter: Twitter
+
+    private fun getRequestToken() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
+            val builder = ConfigurationBuilder()
+                .setDebugEnabled(true)
+                .setOAuthConsumerKey(TwitterConst.CONSUMER_KEY)
+                .setOAuthConsumerSecret(TwitterConst.CONSUMER_SECRET)
+                .setIncludeEmailEnabled(true)
+            val config = builder.build()
+            val factory = TwitterFactory(config)
+            twitter = factory.instance
+            try {
+                val requestToken = twitter.oAuthRequestToken
+                withContext(Dispatchers.Main) {
+                    setupTwitterWebviewDialog(requestToken.authorizationURL)
+                }
+            } catch (e: IllegalStateException) {
+                Log.e("ERROR: ", e.toString())
+            }
+        }
+    }
+
+    lateinit var twitterDialog: Dialog
+
+    // Show twitter login page in a dialog
+    @SuppressLint("SetJavaScriptEnabled")
+    fun setupTwitterWebviewDialog(url: String) {
+        twitterDialog = Dialog(this.context!!)
+        val webView = WebView(this.context)
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
+        webView.webViewClient = TwitterWebViewClient()
+        webView.settings.javaScriptEnabled = true
+        webView.loadUrl(url)
+        twitterDialog.setContentView(webView)
+        twitterDialog.show()
+    }
+
+    // A client to know about WebView navigations
+    // For API 21 and above
+    inner class TwitterWebViewClient : WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): Boolean {
+            if (request?.url.toString().startsWith(TwitterConst.CALLBACK_URL)) {
+                Log.d("Authorization URL: ", request?.url.toString())
+                handleUrl(request?.url.toString())
+
+                // Close the dialog after getting the oauth_verifier
+                if (request?.url.toString().contains(TwitterConst.CALLBACK_URL)) {
+                    twitterDialog.dismiss()
+                }
+                return true
+            }
+            return false
+        }
+
+        // Get the oauth_verifier
+        private fun handleUrl(url: String) {
+            val uri = Uri.parse(url)
+            val oauthVerifier = uri.getQueryParameter("oauth_verifier") ?: ""
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                val token = withContext(Dispatchers.IO) {
+                    twitter.getOAuthAccessToken(oauthVerifier)
+                }
+                storeUserToken(token)
+            }
+        }
+
+        suspend fun storeUserToken(accessToken: AccessToken) {
+            val usr = withContext(Dispatchers.IO) { twitter.verifyCredentials() }
+
+            val userId = usr.id.toString()
+            val name = usr.screenName
+            val token = accessToken.token
+            val tokenSecret = accessToken.tokenSecret
+
+            Log.i("storeUserToken", token)
+            Log.i("storeUserToken", tokenSecret)
+
+            val userToken = UserToken(userId, name, token, tokenSecret)
+            withContext(Dispatchers.IO) { binding.editViewModel?.storeUserToken(userToken) }
+
+        }
+
+        private fun checkLoggedIn(){
+            val token = withContext(Dispatchers.IO) { twitter.verifyCredentials() }
+        }
 
     }
 }

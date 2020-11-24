@@ -6,11 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = arrayOf(TweetSchedule::class), version = 2)
+@Database(entities = arrayOf(TweetSchedule::class, UserToken::class), version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract val tweetScheduleDao: TweetScheduleDao
+    abstract val userTokenDao: UserTokenDao
 
     companion object {
 
