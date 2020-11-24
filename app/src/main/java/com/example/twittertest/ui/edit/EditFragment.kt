@@ -50,7 +50,6 @@ class EditFragment : Fragment() {
 
     private lateinit var viewModel: EditViewModel
     lateinit var binding: FragmentEditBinding
-    val isLoggedIn = false
     val args:EditFragmentArgs by navArgs()
 
 
@@ -72,17 +71,6 @@ class EditFragment : Fragment() {
         val viewModelFactory = EditViewModelFactory(datasource, userTokenDao, tweetId, application)
         val viewModel = ViewModelProvider(this, viewModelFactory).get(EditViewModel::class.java)
         binding.editViewModel = viewModel
-
-//        viewModel.tweetContent.observe(viewLifecycleOwner, Observer{
-//            binding.editTextTweet.setText(it)
-//        })
-
-
-
-//        setCurrentDate()
-//        viewModel.tweetContent.observe(viewLifecycleOwner, Observer<String>{tweetContent ->
-//            Log.i(tag, tweetContent)
-//        })
 
         // clickklistener
         binding.textDate.setOnClickListener{
@@ -125,7 +113,7 @@ class EditFragment : Fragment() {
 
     private fun btnScheduleOnClick(application: Application){
 
-        if(!isLoggedIn){
+        if(!viewModel.isLoggedIn){
            Log.i(tag, "you are not logged in.")
             getRequestToken()
         }
@@ -269,12 +257,11 @@ class EditFragment : Fragment() {
             Log.i("storeUserToken", tokenSecret)
 
             val userToken = UserToken(userId, name, token, tokenSecret)
-            withContext(Dispatchers.IO) { binding.editViewModel?.storeUserToken(userToken) }
+            withContext(Dispatchers.IO) {
+                binding.editViewModel?.storeUserToken(userToken)
+                viewModel.userToken = userToken
+            }
 
-        }
-
-        private fun checkLoggedIn(){
-            val token = withContext(Dispatchers.IO) { twitter.verifyCredentials() }
         }
 
     }

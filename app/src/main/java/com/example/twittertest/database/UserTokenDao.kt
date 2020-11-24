@@ -2,10 +2,14 @@ package com.example.twittertest.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+
     @Dao
     interface UserTokenDao {
         @Query("SELECT * FROM user_token")
         fun getAll(): LiveData<List<UserToken>>
+
+        @Query("SELECT * FROM user_token")
+        suspend fun getAllSuspended(): List<UserToken>
 
         @Query("SELECT * FROM user_token WHERE user_id = :id")
         fun selectUserTokenById(id:String): UserToken

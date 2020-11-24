@@ -3,10 +3,7 @@ package com.example.twittertest.ui.edit
 import android.app.Application
 import android.text.format.DateUtils
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -30,6 +27,8 @@ class EditViewModel(
 
     private val tag ="EditViewModel"
     private val workManager = WorkManager.getInstance()
+    var isLoggedIn = false
+    var userToken: UserToken? = null
     // LiveData
     val tweetContent = MutableLiveData<String>()
     val tweetContentLength = Transformations.map(tweetContent){
@@ -51,6 +50,7 @@ class EditViewModel(
         scheduleDateTime.value = LocalDateTime.now()
         tweetContent.value = ""
         val tweetSchedule = getTweetSchedule(tweetId)
+        setUserToken()
 
     }
 
@@ -94,6 +94,8 @@ class EditViewModel(
     private fun setTweetWork(tweetId:Long, initialDelayMinute:Long) {
         val builder = Data.Builder()
         builder.putLong("id", tweetId)
+        builder.putString("token", userToken?.token)
+        builder.putString("tokenSecret", userToken?.tokenSecret)
 
         val tweetRequest = OneTimeWorkRequestBuilder<TweetWorker>()
             .setInitialDelay(initialDelayMinute, TimeUnit.MINUTES)
@@ -131,5 +133,15 @@ class EditViewModel(
 
     suspend fun storeUserToken(userToken: UserToken){
         userTokenDao.insert(userToken)
+    }
+
+    private fun setUserToken(){
+        lateinit var userTokens: LiveData<List<UserToken>>
+        viewModelScope.launch{
+            userTokens = userTokenDao.getAll()
+        }
+
+        userToken = userTokens.value?.get(0)
+        isLoggedIn = true
     }
 }
