@@ -26,5 +26,7 @@ import androidx.room.*
         @Query("DELETE FROM user_token WHERE user_id = :id")
         suspend fun deleteUserTokenById(id:String)
 
+        @Query("DELETE FROM user_token")
+        suspend fun deleteAll()
 
     }

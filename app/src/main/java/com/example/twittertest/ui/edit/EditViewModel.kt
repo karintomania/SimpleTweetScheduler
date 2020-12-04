@@ -29,8 +29,12 @@ class EditViewModel(
     private val workManager = WorkManager.getInstance()
     var isLoggedIn = false
     var userToken: UserToken? = null
+
     // LiveData
     val tweetContent = MutableLiveData<String>()
+
+    // when true, hide Log in button and enable schedule btn.
+    val enableScheduleBtn = MutableLiveData<Boolean>()
     val tweetContentLength = Transformations.map(tweetContent){
         TweetContentCounter.countRestCharacter(it).toString()
 //        it.length.toString()
@@ -47,6 +51,7 @@ class EditViewModel(
     }
 
     init{
+        logOutAll()
         scheduleDateTime.value = LocalDateTime.now()
         tweetContent.value = ""
         val tweetSchedule = getTweetSchedule(tweetId)
@@ -142,6 +147,20 @@ class EditViewModel(
         }
 
         userToken = userTokens.value?.get(0)
-        isLoggedIn = true
+        isLoggedIn = !(userToken == null)
+        enableScheduleBtn.value = isLoggedIn
     }
+
+    private fun logOutAll(){
+        viewModelScope.launch{
+            deleteAll()
+        }
+
+    }
+
+    suspend fun deleteAll(){
+        userTokenDao.deleteAll()
+    }
+
+
 }

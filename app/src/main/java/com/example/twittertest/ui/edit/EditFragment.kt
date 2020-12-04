@@ -2,10 +2,8 @@ package com.example.twittertest.ui.edit
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.Application
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.app.TimePickerDialog
+import android.app.*
+import android.content.DialogInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -29,6 +27,7 @@ import com.example.twittertest.database.AppDatabase
 import com.example.twittertest.database.TweetScheduleDao
 import com.example.twittertest.database.UserToken
 import com.example.twittertest.databinding.FragmentEditBinding
+import kotlinx.android.synthetic.main.fragment_edit.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -89,6 +88,23 @@ class EditFragment : Fragment() {
             btnScheduleOnClick(application)
         }
 
+        binding.textLogin.setOnClickListener{
+            getRequestToken()
+
+        }
+
+        viewModel.enableScheduleBtn.observe(viewLifecycleOwner, {
+            if(it){
+                Log.i("enable", "schedule enable")
+                binding.buttonSchedule.isEnabled = true
+                binding.textLogin.visibility = View.GONE
+            }else{
+                Log.i("enable", "schedule disable")
+                binding.buttonSchedule.isEnabled = true
+                binding.textLogin.visibility = View.VISIBLE
+            }
+        })
+
         return binding.root
 
     }
@@ -107,17 +123,17 @@ class EditFragment : Fragment() {
         binding.editViewModel?.onSave(tweetContent)
 
         binding.editTextTweet.setText("")
-        Toast.makeText(application,"Saved as a draft.",Toast.LENGTH_SHORT).show()
+        Toast.makeText(application,"Saved as a draft.", Toast.LENGTH_SHORT).show()
 
     }
 
     private fun btnScheduleOnClick(application: Application){
+        scheduleTweet()
+        binding.editTextTweet.setText("")
+        Toast.makeText(requireContext(),"Tweet scheduled",Toast.LENGTH_SHORT).show()
+    }
 
-        if(!viewModel.isLoggedIn){
-           Log.i(tag, "you are not logged in.")
-            getRequestToken()
-        }
-
+    private fun scheduleTweet(){
         val tweetContent = binding.editTextTweet.text.toString()
 
         val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
@@ -126,10 +142,8 @@ class EditFragment : Fragment() {
 
         binding.editViewModel?.onSchedule(tweetContent, scheduleDateTime)
 
-        binding.editTextTweet.setText("")
-        Toast.makeText(application,"Scheduled Tweet: ${dateTimeString}.",Toast.LENGTH_SHORT).show()
-
     }
+
     private fun editTextDateOnClick(){
 
         Log.i(tag, "editTextDateOnClick")
@@ -176,6 +190,22 @@ class EditFragment : Fragment() {
     // Twitter Log in.
     lateinit var twitter: Twitter
 
+    private fun askLogin() {
+        val builder = AlertDialog.Builder(context)
+
+        builder.setTitle("Androidly Alert")
+        builder.setMessage("We have a message")
+
+        builder.setPositiveButton("Log in"){ dialog, id ->
+            getRequestToken()
+        }
+
+        builder.setNegativeButton("Cancel"){ dialog, id ->
+        }
+
+        builder.show()
+    }
+
     private fun getRequestToken() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
             val builder = ConfigurationBuilder()
@@ -196,6 +226,7 @@ class EditFragment : Fragment() {
             }
         }
     }
+
 
     lateinit var twitterDialog: Dialog
 
@@ -259,8 +290,10 @@ class EditFragment : Fragment() {
             val userToken = UserToken(userId, name, token, tokenSecret)
             withContext(Dispatchers.IO) {
                 binding.editViewModel?.storeUserToken(userToken)
-                viewModel.userToken = userToken
             }
+            viewModel.userToken = userToken
+            viewModel.isLoggedIn = true
+            viewModel.enableScheduleBtn.value = true
 
         }
 
